@@ -8,7 +8,7 @@ import { View, Alert } from './types';
 import { INITIAL_ALERTS } from './constants';
 import { DollarSign, Users, Activity, BedDouble } from 'lucide-react';
 import { RevenueTrendChart } from './components/Charts';
-import { REVENUE_DATA } from './constants';
+import { apiService } from './services/apiService';
 
 function App() {
   // Initialize auth state from localStorage
@@ -23,6 +23,13 @@ function App() {
   const [currentView, setCurrentView] = useState<View>('EXECUTIVE');
   const [alerts, setAlerts] = useState<Alert[]>(INITIAL_ALERTS);
   const [darkMode, setDarkMode] = useState(false);
+  const [metrics, setMetrics] = useState({
+    occupancyRate: 0,
+    dailyRevenue: 0,
+    arrivalsToday: 0,
+    inHouseGuests: 0
+  });
+  const [revenueData, setRevenueData] = useState([]);
 
   useEffect(() => {
     if (darkMode) {
@@ -31,6 +38,25 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadDashboardData();
+    }
+  }, [isAuthenticated]);
+
+  const loadDashboardData = async () => {
+    try {
+      const [metricsData, revenueData] = await Promise.all([
+        apiService.getDashboardMetrics(),
+        apiService.getRevenueData()
+      ]);
+      setMetrics(metricsData);
+      setRevenueData(revenueData);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+    }
+  };
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
@@ -66,16 +92,16 @@ function App() {
             
             {/* KPI Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard label="Occupancy Rate" value="85.5%" trend={2.3} icon={<BedDouble size={24}/>} />
-              <StatCard label="RevPAR" value="$208.40" trend={-1.2} icon={<Activity size={24}/>} />
-              <StatCard label="Total Revenue" value="$45,250" trend={8.1} icon={<DollarSign size={24}/>} />
-              <StatCard label="Guest Satisfaction" value="4.8/5.0" trend={0.5} icon={<Users size={24}/>} />
+              <StatCard label="Occupancy Rate" value={`${metrics.occupancyRate}%`} trend={2.3} icon={<BedDouble size={24}/>} />
+              <StatCard label="Daily Revenue" value={`$${metrics.dailyRevenue?.toLocaleString() || '0'}`} trend={-1.2} icon={<DollarSign size={24}/>} />
+              <StatCard label="Arrivals Today" value={metrics.arrivalsToday.toString()} trend={8.1} icon={<Activity size={24}/>} />
+              <StatCard label="In-House Guests" value={metrics.inHouseGuests.toString()} trend={0.5} icon={<Users size={24}/>} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Chart */}
               <Card title="Revenue Performance (Last 30 Days)" className="lg:col-span-2">
-                <RevenueTrendChart data={REVENUE_DATA} darkMode={darkMode} />
+                <RevenueTrendChart data={revenueData} darkMode={darkMode} />
               </Card>
 
               {/* Alerts & Actions */}
