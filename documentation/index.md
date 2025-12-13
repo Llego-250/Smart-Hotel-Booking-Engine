@@ -23,6 +23,7 @@ This comprehensive documentation suite covers all aspects of the Smart Hotel Boo
 ### 🚀 Operations & Deployment
 - **[deployment_guide.md](deployment_guide.md)** - Production deployment and maintenance
 - **[business_process.md](business_process.md)** - Business workflows and processes
+- **[bpmn_diagrams.md](bpmn_diagrams.md)** - BPMN process models and workflows
 
 ### 📊 Business Intelligence
 - **[bi_requirements.md](../business_intelligence/bi_requirements.md)** - BI dashboard requirements
@@ -47,16 +48,18 @@ Focus on these documents for deployment and operations:
 ### For Business Analysts
 Review these documents for business understanding:
 1. [business_process.md](business_process.md) - Business workflows
-2. [bi_requirements.md](../business_intelligence/bi_requirements.md) - Analytics requirements
-3. [README.md](README.md) - System capabilities
-4. [data_dictionary.md](data_dictionary.md) - Data structure
+2. [bpmn_diagrams.md](bpmn_diagrams.md) - BPMN process models
+3. [bi_requirements.md](../business_intelligence/bi_requirements.md) - Analytics requirements
+4. [README.md](README.md) - System capabilities
+5. [data_dictionary.md](data_dictionary.md) - Data structure
 
 ### For Project Managers
 Essential documents for project oversight:
 1. [README.md](README.md) - Project overview
 2. [architecture.md](architecture.md) - Technical architecture
-3. [deployment_guide.md](deployment_guide.md) - Deployment planning
-4. [business_process.md](business_process.md) - Business requirements
+3. [bpmn_diagrams.md](bpmn_diagrams.md) - Process workflows
+4. [deployment_guide.md](deployment_guide.md) - Deployment planning
+5. [business_process.md](business_process.md) - Business requirements
 
 ## 📋 Document Summaries
 
