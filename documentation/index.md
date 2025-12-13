@@ -277,7 +277,7 @@ This documentation serves as a comprehensive learning resource for:
 
 **Project Developer:** Sesonga Raphael  
 **Student ID:** 28301  
-**Institution:** [Your Institution Name]  
+**Institution:** AUCA
 **Course:** Oracle PL/SQL Development  
 **Project Repository:** Smart-Hotel-Booking-Engine
 
