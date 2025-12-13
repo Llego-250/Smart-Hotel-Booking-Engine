@@ -3,8 +3,8 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { RevenueData, GuestSegment, BookingForecast } from '../types';
 
 export const RevenueTrendChart: React.FC<{ data: RevenueData[], darkMode?: boolean }> = ({ data, darkMode }) => (
-  <div className="h-64 w-full">
-    <ResponsiveContainer width="100%" height="100%">
+  <div className="h-64 w-full" style={{ minHeight: '256px', minWidth: '300px' }}>
+    <ResponsiveContainer width="100%" height={256}>
       <AreaChart data={data}>
         <defs>
           <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -33,8 +33,8 @@ export const RevenueTrendChart: React.FC<{ data: RevenueData[], darkMode?: boole
 );
 
 export const SegmentPieChart: React.FC<{ data: GuestSegment[] }> = ({ data }) => (
-  <div className="h-64 w-full">
-    <ResponsiveContainer width="100%" height="100%">
+  <div className="h-64 w-full" style={{ minHeight: '256px', minWidth: '300px' }}>
+    <ResponsiveContainer width="100%" height={256}>
       <PieChart>
         <Pie
           data={data as any[]}
@@ -58,8 +58,8 @@ export const SegmentPieChart: React.FC<{ data: GuestSegment[] }> = ({ data }) =>
 );
 
 export const ForecastChart: React.FC<{ data: BookingForecast[], darkMode?: boolean }> = ({ data, darkMode }) => (
-  <div className="h-64 w-full">
-    <ResponsiveContainer width="100%" height="100%">
+  <div className="h-64 w-full" style={{ minHeight: '256px', minWidth: '300px' }}>
+    <ResponsiveContainer width="100%" height={256}>
       <AreaChart data={data}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={darkMode ? "#374151" : "#f0f0f0"} />
         <XAxis dataKey="date" fontSize={12} tickMargin={10} stroke={darkMode ? "#9CA3AF" : "#666"} />
