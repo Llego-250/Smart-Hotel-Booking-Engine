@@ -1,20 +1,38 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Smart Hotel Booking Engine
 
-# Run and deploy your AI Studio app
+**Student:** Sesonga Raphael  
+**Student ID:** 28301  
+**Project:** Oracle PL/SQL Hotel Management System
 
-This contains everything you need to run your app locally.
+## Problem Statement
+Manual reservation logs breed double-bookings, lost payments and unhappy guests. This project replaces fragile workflows with a single Oracle-backed engine that updates room state, pricing and guest data in real time.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1KPt8Xtf5sCkHMPFD8klWICj1sqa0Y7h0
+## Key Objectives
+- Automate guest registration and room allocation
+- Implement real-time reservation lifecycle management  
+- Process payments with full audit trails
+- Eliminate double-bookings through database triggers
+- Provide role-based access control and security
 
-## Run Locally
+## Quick Start
+1. Run `database/scripts/01_create_database.sql` to set up database
+2. Execute `database/scripts/02_create_tables.sql` for table structure
+3. Load test data with `database/scripts/03_insert_data.sql`
+4. Deploy procedures from `database/scripts/04_procedures.sql`
 
-**Prerequisites:**  Node.js
+## Project Structure
+```
+smart-hotel-booking/
+├── database/
+│   ├── scripts/
+│   └── documentation/
+├── queries/
+├── business_intelligence/
+├── screenshots/
+└── documentation/
+```
 
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Documentation Links
+- [Data Dictionary](documentation/data_dictionary.md)
+- [Architecture](documentation/architecture.md)
+- [Business Process Model](documentation/business_process.md)
