@@ -579,9 +579,9 @@ npm start
 ```bash
 # Production .env
 NODE_ENV=production
-DB_USER=hotel_prod_user
-DB_PASSWORD=secure_password
-DB_CONNECT_STRING=prod-oracle-server:1521/HOTELPROD
+DB_USER=pdb_admin
+DB_PASSWORD=12345
+DB_CONNECT_STRING=localhost:1521/SHBE_db
 PORT=3001
 ```
 
@@ -597,7 +597,7 @@ PORT=3001
 lsnrctl status
 
 # Verify connection string
-sqlplus username/password@localhost:1521/XE
+sqlplus pdb_admin/12345@localhost:1521/SHBE_db
 ```
 
 #### API Server Issues
