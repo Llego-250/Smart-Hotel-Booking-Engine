@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { MOCK_ROOMS } from '../constants';
+import React, { useState, useEffect } from 'react';
 import { Room, RoomStatus } from '../types';
 import { Card, Badge, Button } from './UI';
 import { Filter, RotateCcw, BedDouble, Wrench, SprayCan, UserCheck } from 'lucide-react';
+import { apiService } from '../services/apiService';
 
 const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
   const getStatusColor = (status: RoomStatus) => {
@@ -53,15 +53,41 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
 
 export const OperationsDashboard: React.FC = () => {
   const [filter, setFilter] = useState<RoomStatus | 'ALL'>('ALL');
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const stats = {
-    available: MOCK_ROOMS.filter(r => r.status === RoomStatus.AVAILABLE).length,
-    occupied: MOCK_ROOMS.filter(r => r.status === RoomStatus.OCCUPIED).length,
-    dirty: MOCK_ROOMS.filter(r => r.status === RoomStatus.DIRTY).length,
-    maintenance: MOCK_ROOMS.filter(r => r.status === RoomStatus.MAINTENANCE).length,
+  useEffect(() => {
+    loadRoomData();
+  }, []);
+
+  const loadRoomData = async () => {
+    try {
+      const roomData = await apiService.getRoomStatus();
+      const mappedRooms = roomData.map((room: any) => ({
+        id: room.roomId,
+        number: room.roomNumber,
+        type: room.roomType,
+        status: room.status as RoomStatus,
+        guestName: room.guestName,
+        price: 150, // Default price
+        checkOut: '12:00 PM' // Default checkout
+      }));
+      setRooms(mappedRooms);
+    } catch (error) {
+      console.error('Failed to load room data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredRooms = filter === 'ALL' ? MOCK_ROOMS : MOCK_ROOMS.filter(r => r.status === filter);
+  const stats = {
+    available: rooms.filter(r => r.status === RoomStatus.AVAILABLE).length,
+    occupied: rooms.filter(r => r.status === RoomStatus.OCCUPIED).length,
+    dirty: rooms.filter(r => r.status === RoomStatus.DIRTY).length,
+    maintenance: rooms.filter(r => r.status === RoomStatus.MAINTENANCE).length,
+  };
+
+  const filteredRooms = filter === 'ALL' ? rooms : rooms.filter(r => r.status === filter);
 
   return (
     <div className="space-y-6">
@@ -71,7 +97,7 @@ export const OperationsDashboard: React.FC = () => {
           <p className="text-gray-500 dark:text-gray-400 text-sm">Real-time room status and housekeeping management</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setFilter('ALL')}><RotateCcw size={16}/> Refresh</Button>
+          <Button variant="outline" onClick={loadRoomData}><RotateCcw size={16}/> Refresh</Button>
           <Button><Filter size={16}/> Filter View</Button>
         </div>
       </div>
@@ -112,9 +138,15 @@ export const OperationsDashboard: React.FC = () => {
           ))}
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
-          {filteredRooms.map(room => (
-            <RoomCard key={room.id} room={room} />
-          ))}
+          {loading ? (
+            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">Loading rooms...</div>
+          ) : filteredRooms.length === 0 ? (
+            <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">No rooms found</div>
+          ) : (
+            filteredRooms.map(room => (
+              <RoomCard key={room.id} room={room} />
+            ))
+          )}
         </div>
       </Card>
     </div>

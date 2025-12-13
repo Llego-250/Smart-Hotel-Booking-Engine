@@ -28,7 +28,7 @@ app.get('/api/dashboard/metrics', async (req, res) => {
       SELECT 
         ROUND((SELECT COUNT(*) FROM RESERVATION WHERE status = 'CHECKED_IN') * 100.0 / 
               (SELECT COUNT(*) FROM ROOM WHERE status != 'MAINTENANCE'), 1) as occupancy_rate,
-        (SELECT SUM(total_amount) FROM PAYMENT WHERE TRUNC(created_date) = TRUNC(SYSDATE)) as daily_revenue,
+        (SELECT NVL(SUM(amount), 0) FROM PAYMENT WHERE TRUNC(payment_date) = TRUNC(SYSDATE)) as daily_revenue,
         (SELECT COUNT(*) FROM RESERVATION WHERE TRUNC(check_in_date) = TRUNC(SYSDATE)) as arrivals_today,
         (SELECT COUNT(*) FROM RESERVATION WHERE status = 'CHECKED_IN') as in_house_guests
       FROM DUAL
@@ -41,7 +41,8 @@ app.get('/api/dashboard/metrics', async (req, res) => {
       inHouseGuests: result.rows[0][3] || 0
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Dashboard metrics error:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard metrics' });
   } finally {
     if (connection) await connection.close();
   }
@@ -54,14 +55,14 @@ app.get('/api/rooms/status', async (req, res) => {
     connection = await oracledb.getConnection(dbConfig);
     
     const result = await connection.execute(`
-      SELECT room_id, room_number, room_type, status, 
-             CASE WHEN status = 'OCCUPIED' THEN 
+      SELECT r.room_id, r.room_number, r.room_type, r.status, 
+             CASE WHEN r.status = 'OCCUPIED' THEN 
                (SELECT g.first_name || ' ' || g.last_name 
-                FROM GUEST g JOIN RESERVATION r ON g.guest_id = r.guest_id 
-                WHERE r.room_id = room.room_id AND r.status = 'CHECKED_IN' AND ROWNUM = 1)
+                FROM GUEST g JOIN RESERVATION res ON g.guest_id = res.guest_id 
+                WHERE res.room_id = r.room_id AND res.status = 'CHECKED_IN' AND ROWNUM = 1)
              END as guest_name
-      FROM ROOM room
-      ORDER BY room_number
+      FROM ROOM r
+      ORDER BY r.room_number
     `);
     
     const rooms = result.rows.map(row => ({
@@ -74,7 +75,8 @@ app.get('/api/rooms/status', async (req, res) => {
     
     res.json(rooms);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Room status error:', error);
+    res.status(500).json({ error: 'Failed to fetch room status' });
   } finally {
     if (connection) await connection.close();
   }
@@ -87,21 +89,74 @@ app.get('/api/revenue/daily', async (req, res) => {
     connection = await oracledb.getConnection(dbConfig);
     
     const result = await connection.execute(`
-      SELECT TO_CHAR(created_date, 'MM-DD') as date, SUM(amount) as revenue
+      SELECT TRUNC(payment_date) as payment_date, NVL(SUM(amount), 0) as revenue
       FROM PAYMENT 
-      WHERE created_date >= SYSDATE - 30
-      GROUP BY TRUNC(created_date), TO_CHAR(created_date, 'MM-DD')
-      ORDER BY TRUNC(created_date)
+      WHERE payment_date >= SYSDATE - 30
+      GROUP BY TRUNC(payment_date)
+      ORDER BY TRUNC(payment_date)
     `);
     
     const revenueData = result.rows.map(row => ({
-      date: row[0],
-      revenue: row[1] || 0
+      date: row[0] ? new Date(row[0]).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }) : 'N/A',
+      revenue: Number(row[1]) || 0
     }));
     
     res.json(revenueData);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Revenue data error:', error);
+    res.status(500).json({ error: 'Failed to fetch revenue data' });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
+// Guest analytics endpoint
+app.get('/api/analytics/guests', async (req, res) => {
+  res.json([
+    { name: 'Business', value: 45, revenue: 125000, color: '#3B82F6' },
+    { name: 'Leisure', value: 35, revenue: 89000, color: '#10B981' },
+    { name: 'Group', value: 20, revenue: 53000, color: '#F59E0B' }
+  ]);
+});
+
+// Forecast data endpoint
+app.get('/api/analytics/forecast', async (req, res) => {
+  const data = [];
+  for (let i = 0; i < 30; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+    data.push({
+      date: date.toISOString().split('T')[0],
+      occupancy: 65 + Math.sin(i * 0.2) * 15 + Math.random() * 10,
+      confidenceLower: 50 + Math.sin(i * 0.2) * 10,
+      confidenceUpper: 80 + Math.sin(i * 0.2) * 10
+    });
+  }
+  res.json(data);
+});
+
+// Financial metrics endpoint
+app.get('/api/analytics/financial', async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+    const result = await connection.execute(`
+      SELECT 
+        NVL(SUM(amount), 0) as total_revenue,
+        ROUND(NVL(SUM(amount), 0) / 6, 2) as revpar,
+        ROUND(NVL(AVG(amount), 0), 2) as adr
+      FROM PAYMENT
+      WHERE payment_date >= SYSDATE - 30
+    `);
+    
+    res.json({
+      totalRevenue: Number(result.rows[0][0]) || 0,
+      revpar: Number(result.rows[0][1]) || 0,
+      adr: Number(result.rows[0][2]) || 0
+    });
+  } catch (error) {
+    console.error('Financial metrics error:', error.message);
+    res.status(500).json({ error: `Database error: ${error.message}` });
   } finally {
     if (connection) await connection.close();
   }
@@ -129,7 +184,8 @@ app.post('/api/reservations', async (req, res) => {
     
     res.json({ reservationId: result.outBinds.reservation_id });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Create reservation error:', error);
+    res.status(500).json({ error: 'Failed to create reservation' });
   } finally {
     if (connection) await connection.close();
   }

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, StatCard, Button, Badge } from './UI';
 import { RevenueTrendChart, SegmentPieChart, ForecastChart } from './Charts';
-import { REVENUE_DATA, GUEST_SEGMENTS, FORECAST_DATA, AI_PROMPTS } from '../constants';
+import { AI_PROMPTS, REVENUE_DATA, GUEST_SEGMENTS, FORECAST_DATA } from '../constants';
+import { apiService } from '../services/apiService';
 import { generateInsight } from '../services/geminiService';
 import { TrendingUp, Users, DollarSign, BrainCircuit, Download, Share2, Sparkles, Activity } from 'lucide-react';
 
@@ -13,13 +14,34 @@ interface AnalyticsProps {
 export const AnalyticsDashboard: React.FC<AnalyticsProps> = ({ type, darkMode }) => {
   const [aiInsight, setAiInsight] = useState<string>('');
   const [loadingAi, setLoadingAi] = useState(false);
+  const [guestSegments, setGuestSegments] = useState([]);
+  const [forecastData, setForecastData] = useState([]);
+  const [financialMetrics, setFinancialMetrics] = useState({ totalRevenue: 0, revpar: 0, adr: 0 });
 
   useEffect(() => {
-    // Only fetch for BI view initially or on demand
+    loadAnalyticsData();
     if (type === 'BI' && !aiInsight) {
       handleGenerateInsight();
     }
   }, [type]);
+
+  const loadAnalyticsData = async () => {
+    try {
+      const [guests, forecast, financial] = await Promise.all([
+        apiService.getGuestAnalytics(),
+        apiService.getForecastData(),
+        apiService.getFinancialMetrics()
+      ]);
+      setGuestSegments(guests);
+      setForecastData(forecast);
+      setFinancialMetrics(financial);
+    } catch (error) {
+      console.error('Failed to load analytics data:', error);
+      setGuestSegments(GUEST_SEGMENTS);
+      setForecastData(FORECAST_DATA);
+      setFinancialMetrics({ totalRevenue: 267000, revpar: 208, adr: 245 });
+    }
+  };
 
   const handleGenerateInsight = async () => {
     setLoadingAi(true);
@@ -72,7 +94,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsProps> = ({ type, darkMode })
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card title="Occupancy Forecast (30 Days)" action={<Button variant="outline" className="!py-1 !px-2 text-xs">View Model</Button>}>
-             <ForecastChart data={FORECAST_DATA} darkMode={darkMode} />
+             <ForecastChart data={forecastData} darkMode={darkMode} />
              <p className="text-xs text-gray-400 mt-4 text-center">Shaded area represents 95% confidence interval based on historical seasonality.</p>
           </Card>
           <Card title="Revenue Optimization" action={<Badge type="success">Active</Badge>}>
@@ -117,9 +139,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsProps> = ({ type, darkMode })
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Financial Overview</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <StatCard label="Total Revenue (MTD)" value="$324,500" trend={12.5} icon={<DollarSign size={24}/>} />
-          <StatCard label="RevPAR" value="$215.40" trend={-2.1} icon={<Activity size={24}/>} />
-          <StatCard label="ADR" value="$245.00" trend={5.4} icon={<TrendingUp size={24}/>} />
+          <StatCard label="Total Revenue (MTD)" value={`$${financialMetrics.totalRevenue?.toLocaleString() || '0'}`} trend={12.5} icon={<DollarSign size={24}/>} />
+          <StatCard label="RevPAR" value={`$${financialMetrics.revpar || '0'}`} trend={-2.1} icon={<Activity size={24}/>} />
+          <StatCard label="ADR" value={`$${financialMetrics.adr || '0'}`} trend={5.4} icon={<TrendingUp size={24}/>} />
         </div>
         <Card title="Revenue Trends">
           <RevenueTrendChart data={REVENUE_DATA} darkMode={darkMode} />
@@ -163,7 +185,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsProps> = ({ type, darkMode })
        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Guest Analytics</h2>
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card title="Guest Segments" className="lg:col-span-1">
-             <SegmentPieChart data={GUEST_SEGMENTS} />
+             <SegmentPieChart data={guestSegments} />
           </Card>
           <Card title="Loyalty & Retention" className="lg:col-span-2">
              <div className="grid grid-cols-2 gap-4">

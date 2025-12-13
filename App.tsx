@@ -133,15 +133,15 @@ function App() {
                    <div className="space-y-4">
                      <div className="flex justify-between items-center">
                        <span className="text-sm text-gray-600 dark:text-gray-400">Arrivals Today</span>
-                       <Badge type="info">24 Bookings</Badge>
+                       <Badge type="info">{metrics.arrivalsToday} Bookings</Badge>
                      </div>
                      <div className="flex justify-between items-center">
-                       <span className="text-sm text-gray-600 dark:text-gray-400">Departures Today</span>
-                       <Badge type="warning">18 Pending</Badge>
+                       <span className="text-sm text-gray-600 dark:text-gray-400">Daily Revenue</span>
+                       <Badge type="success">${metrics.dailyRevenue?.toLocaleString() || '0'}</Badge>
                      </div>
                      <div className="flex justify-between items-center">
                        <span className="text-sm text-gray-600 dark:text-gray-400">In-House</span>
-                       <span className="text-sm font-bold text-gray-900 dark:text-white">88 Guests</span>
+                       <span className="text-sm font-bold text-gray-900 dark:text-white">{metrics.inHouseGuests} Guests</span>
                      </div>
                    </div>
                 </Card>

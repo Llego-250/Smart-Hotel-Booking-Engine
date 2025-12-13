@@ -28,5 +28,30 @@ export const apiService = {
       body: JSON.stringify(data)
     });
     return response.json();
+  },
+
+  async getGuestAnalytics() {
+    const response = await fetch(`${API_BASE_URL}/analytics/guests`);
+    return response.json();
+  },
+
+  async getFinancialMetrics() {
+    const response = await fetch(`${API_BASE_URL}/analytics/financial`);
+    return response.json();
+  },
+
+  async getServiceAnalytics() {
+    const response = await fetch(`${API_BASE_URL}/analytics/services`);
+    return response.json();
+  },
+
+  async getPaymentAnalytics() {
+    const response = await fetch(`${API_BASE_URL}/analytics/payments`);
+    return response.json();
+  },
+
+  async getForecastData() {
+    const response = await fetch(`${API_BASE_URL}/analytics/forecast`);
+    return response.json();
   }
 };
