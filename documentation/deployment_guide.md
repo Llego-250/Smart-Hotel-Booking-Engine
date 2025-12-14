@@ -49,14 +49,14 @@ This guide covers the complete deployment process for the Smart Hotel Booking En
 
 ```sql
 -- Create database user
-CREATE USER hotel_dev IDENTIFIED BY "dev_password_123";
+CREATE USER pdb_admin IDENTIFIED BY "12345";
 
 -- Grant necessary privileges
-GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE PROCEDURE TO hotel_dev;
-GRANT UNLIMITED TABLESPACE TO hotel_dev;
+GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE PROCEDURE TO pdb_admin;
+GRANT UNLIMITED TABLESPACE TO pdb_admin;
 
--- Connect as hotel_dev user
-CONNECT hotel_dev/dev_password_123@localhost:1521/XE;
+-- Connect as pdb_admin user
+CONNECT pdb_admin/12345@localhost:1521/SHBE_db;
 
 -- Run database scripts
 @database/scripts/01_functions_procedures.sql
@@ -74,9 +74,9 @@ cd server
 cat > .env << EOF
 NODE_ENV=development
 PORT=3001
-DB_USER=hotel_dev
-DB_PASSWORD=dev_password_123
-DB_CONNECT_STRING=localhost:1521/XE
+DB_USER=pdb_admin
+DB_PASSWORD=12345
+DB_CONNECT_STRING=localhost:1521/SHBE_db
 EOF
 
 # Install dependencies
@@ -107,9 +107,9 @@ cd server
 node -e "
 const oracledb = require('oracledb');
 const config = {
-  user: 'hotel_dev',
-  password: 'dev_password_123',
-  connectString: 'localhost:1521/XE'
+  user: 'pdb_admin',
+  password: '12345',
+  connectString: 'localhost:1521/SHBE_db'
 };
 oracledb.getConnection(config)
   .then(conn => { console.log('Database connected!'); conn.close(); })
