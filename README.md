@@ -1,9 +1,5 @@
 # Smart Hotel Booking Engine
 
-**Student:** Sesonga Raphael  
-**Student ID:** 28301  
-**Project:** Oracle PL/SQL Hotel Management System
-
 ## Problem Statement
 Manual reservation logs breed double-bookings, lost payments and unhappy guests. This project replaces fragile workflows with a single Oracle-backed engine that updates room state, pricing and guest data in real time.
 
